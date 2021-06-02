@@ -4,7 +4,11 @@ const app = express();
 const dotenv = require("dotenv")
 const mongoose =  require("mongoose");
 const router = require("./Routes/auth.js");
-const updaterouter = require('./Routes/Users.js')
+const updaterouter = require('./Routes/Users.js');
+const postrouter = require('./Routes/Posts.js');
+const Catagoryrouter = require('./Routes/categories.js');
+
+const multer = require("multer");
 
 
 dotenv.config();
@@ -19,8 +23,27 @@ mongoose.connect(process.env.MONGO_URL,{
 }).then(console.log("connect to mongoDB"))
 .catch((err) => console.log(err));
 
+const storage = multer.diskStorage({
+    destination:(req, file, cb) => {
+
+       cb(null,"Images")
+
+    },filename:(req, file, cb) => {
+
+        cb(null,"hello.jpg");
+    }
+});
+
+const upload = multer({storage:storage});
+app.use("/api/upload",upload.single("file"), (req,res)=>{
+    res.status(200).json("File has been uploaded");
+})
+
+
 app.use("/api/auth", router);
 app.use("/api/users", updaterouter);
+app.use("/api/posts", postrouter);
+app.use("/api/catagories", Catagoryrouter);
 
 
 app.listen("5000", ()=>{
